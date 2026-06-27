@@ -1,4 +1,6 @@
 <turbo-frame id="session_sidebar">
+  <% pending_counts_by_run_id = local_assigns.fetch(:pending_counts_by_run_id) { {} } %>
+
   <div class="flex h-full flex-col">
     <div class="ap-pane-header">
       <div class="flex items-end justify-between gap-4">
@@ -15,6 +17,7 @@
         <ol class="space-y-1">
           <% runs.each do |run| %>
             <% selected = selected_run&.id == run.id %>
+            <% pending_count = pending_counts_by_run_id.fetch(run.id, 0) %>
             <li>
               <%= link_to run_path(run), class: "ap-session-row #{selected ? "ap-session-row-selected" : ""}", data: { turbo_frame: "_top" } do %>
                 <span class="ap-status-dot mt-1 shrink-0 <%= status_dot_classes(run.status) %>"></span>
@@ -25,8 +28,8 @@
                     <%= run.runtime_label %> / <%= run.runtime_session_id.presence || "demo-run-#{run.id}" %>
                   </span>
                 </span>
-                <% if run.permission_requests.pending.exists? %>
-                  <span class="ap-count-pill shrink-0"><%= run.permission_requests.pending.count %></span>
+                <% if pending_count.positive? %>
+                  <span class="ap-count-pill shrink-0"><%= pending_count %></span>
                 <% end %>
               <% end %>
             </li>

@@ -13,7 +13,8 @@ class RunsController < ApplicationController
 
   def show
     @run = Run.find(params[:id])
-    @runs = Run.session_list
+    @session_sidebar = Run.session_sidebar_locals(selected_run: @run)
+    @runs = @session_sidebar.fetch(:runs)
     @passport_tree = @run.passport_tree
     @selected_passport = @passport_tree.selected_passport(params[:passport_id])
     @panel = %w[passport audit].include?(params[:panel]) ? params[:panel] : nil
