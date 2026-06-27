@@ -1,1 +1,6 @@
-# See https://www.robotstxt.org/robotstxt.html for documentation on how to use the robots.txt file
+# Agent Control Room is a local-only operational UI, not an indexable public site.
+# There is intentionally no Sitemap directive or sitemap.xml until a public
+# canonical host and public-only URL surface are defined.
+
+User-agent: *
+Disallow: /
