@@ -1,4 +1,8 @@
 <%= turbo_frame_tag "audit_timeline" do %>
+  <% audit_events = audit_event_page.events %>
+  <% visible_count = audit_events.size %>
+  <% total_count = audit_event_page.total_count %>
+
   <div class="flex min-h-[calc(100dvh-53px)] flex-col">
     <div class="ap-pane-header">
       <div class="flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
@@ -6,7 +10,13 @@
           <p class="ap-kicker">audit timeline</p>
           <h2 class="ap-pane-title mt-1">Receipt drawer</h2>
         </div>
-        <p class="ap-mono text-xs ap-muted"><%= pluralize(audit_events.size, "event") %></p>
+        <p class="ap-mono text-xs ap-muted">
+          <% if visible_count == total_count %>
+            <%= pluralize(total_count, "event") %>
+          <% else %>
+            <%= visible_count %> of <%= pluralize(total_count, "event") %>
+          <% end %>
+        </p>
       </div>
     </div>
 
@@ -51,6 +61,18 @@
       <% else %>
         <div class="p-4">
           <p class="ap-empty">no receipts yet</p>
+        </div>
+      <% end %>
+
+      <% if audit_event_page.more_events? || audit_event_page.paginated? %>
+        <div class="ap-pane-header flex items-center justify-between gap-3">
+          <% if audit_event_page.more_events? %>
+            <%= link_to "Load older receipts", run_audit_events_path(run, before_id: audit_event_page.oldest_event_id), class: "ap-quiet-link", data: { turbo_frame: "audit_timeline" } %>
+          <% end %>
+
+          <% if audit_event_page.paginated? %>
+            <%= link_to "Latest receipts", run_audit_events_path(run), class: "ap-quiet-link", data: { turbo_frame: "audit_timeline" } %>
+          <% end %>
         </div>
       <% end %>
     </div>
