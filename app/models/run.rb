@@ -1,6 +1,7 @@
 class Run < ApplicationRecord
   STATUSES = %w[starting running completed interrupted failed].freeze
   MODES = %w[demo manual observed].freeze
+  SESSION_LIST_LIMIT = 50
 
   has_many :passports, dependent: :destroy
   has_many :tool_actions, dependent: :destroy
@@ -16,11 +17,28 @@ class Run < ApplicationRecord
   before_validation :ensure_bridge_token, on: :create
 
   scope :latest_first, -> { order(created_at: :desc, id: :desc) }
-  scope :session_list, -> { order(Arel.sql("COALESCE(last_seen_at, started_at, created_at) DESC"), created_at: :desc, id: :desc) }
+  scope :session_list, -> { order(Arel.sql("COALESCE(last_seen_at, started_at, created_at) DESC"), created_at: :desc, id: :desc).limit(SESSION_LIST_LIMIT) }
   scope :active, -> { where(status: %w[starting running]) }
 
   def self.current
     active.latest_first.first || latest_first.first
+  end
+
+  def self.session_sidebar_locals(selected_run:)
+    runs = session_list.to_a
+
+    {
+      runs: runs,
+      selected_run: selected_run,
+      pending_counts_by_run_id: pending_permission_request_counts_for(runs)
+    }
+  end
+
+  def self.pending_permission_request_counts_for(runs)
+    run_ids = Array(runs).filter_map(&:id).uniq
+    return {} if run_ids.empty?
+
+    PermissionRequest.pending.where(run_id: run_ids).unscope(:order).group(:run_id).count
   end
 
   def active?
@@ -63,13 +81,14 @@ class Run < ApplicationRecord
 
   def broadcast_control_room!(selected_passport: nil)
     selected_passport ||= self.selected_passport
+    session_sidebar = Run.session_sidebar_locals(selected_run: self)
 
-    broadcast_replace_to self, target: "session_sidebar", partial: "runs/session_sidebar", locals: { runs: Run.session_list, selected_run: self }
+    broadcast_replace_to self, target: "session_sidebar", partial: "runs/session_sidebar", locals: session_sidebar
     broadcast_replace_to self, target: "run_header", partial: "runs/run_header", locals: { run: self }
     broadcast_replace_to self, target: "passport_tree", partial: "runs/passport_tree", locals: { run: self, selected_passport: selected_passport }
     broadcast_replace_to self, target: "permission_inbox", partial: "runs/permission_inbox", locals: { run: self }
     broadcast_replace_to self, target: "audit_timeline", partial: "runs/audit_timeline", locals: { run: self, audit_events: audit_events.chronological }
-    broadcast_replace_to "runtime_sessions", target: "session_sidebar", partial: "runs/session_sidebar", locals: { runs: Run.session_list, selected_run: nil }
+    broadcast_replace_to "runtime_sessions", target: "session_sidebar", partial: "runs/session_sidebar", locals: session_sidebar.merge(selected_run: nil)
 
     return unless selected_passport.present?
 

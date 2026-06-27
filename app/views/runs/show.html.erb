@@ -5,7 +5,7 @@
 
   <section class="ap-workspace">
     <aside class="ap-panel ap-border border-b lg:border-b-0 lg:border-r">
-      <%= render "runs/session_sidebar", runs: @runs || Run.session_list, selected_run: @run %>
+      <%= render partial: "runs/session_sidebar", locals: @session_sidebar || Run.session_sidebar_locals(selected_run: @run) %>
     </aside>
 
     <aside class="ap-panel ap-border border-b lg:border-b-0 lg:border-r">
