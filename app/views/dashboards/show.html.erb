@@ -1,0 +1,29 @@
+<main class="ap-shell min-h-dvh">
+  <div class="ap-border border-b px-4 py-3 sm:px-6">
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div>
+        <p class="ap-kicker">local runtime control</p>
+        <h1 class="ap-mono text-2xl font-medium leading-tight ap-text-strong">Agent Control Room</h1>
+      </div>
+
+      <%= button_to "Start demo run", runs_path, method: :post, class: command_button_classes(:primary) %>
+    </div>
+  </div>
+
+  <section class="ap-workspace ap-workspace-empty">
+    <aside class="ap-panel ap-border border-b lg:border-b-0 lg:border-r">
+      <%= render "runs/session_sidebar", runs: Run.session_list, selected_run: nil %>
+    </aside>
+
+    <div class="grid min-h-[calc(100dvh-73px)] place-items-center px-4 lg:col-span-2">
+      <div class="ap-inspector-box ap-subtle-panel w-full max-w-[720px] p-6" data-testid="empty-start-panel">
+        <p class="ap-kicker">no sessions yet</p>
+        <h2 class="mt-2 text-3xl font-medium leading-tight ap-text-strong">OpenCode observer is waiting</h2>
+        <p class="ap-mono mt-3 text-sm ap-body-muted">start any opencode session on this computer, or run the scripted demo</p>
+        <div class="mt-5">
+          <%= button_to "Start demo run", runs_path, method: :post, class: command_button_classes(:primary) %>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>

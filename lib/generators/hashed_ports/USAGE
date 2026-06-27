@@ -1,0 +1,38 @@
+Description:
+    Makes a Rails app a "native port hasher": its development server port is
+    derived deterministically from the project's folder name (an MD5 hash into
+    the band 3000..3999) instead of always being 3000. Any tool — or AI agent —
+    can then find a project's dev server without guessing or scanning ports;
+    it just recomputes the hash via bin/find_server_port.
+
+    The generator:
+      1. Ships bin/find_server_port — the resolver and single source of truth
+         for port assignment. Reports the live recorded port if the server is
+         already running; otherwise returns the hashed slot, walking forward
+         only if another project already holds it.
+      2. Wires bin/dev to boot on $(bin/find_server_port) and record the chosen
+         port to tmp/pids/dev_server.port.
+      3. For Foreman-based bin/dev launchers, adds foreman to the development
+         bundle, removes the global gem install bootstrap, pins BUNDLE_GEMFILE
+         to this app, and runs `bundle exec foreman`.
+      4. Appends agent guidance to CLAUDE.md (don't assume 3000; resolve the port).
+
+    It is idempotent and safe to run on a mature Rails app that already has its
+    own bin/dev — it injects the PORT-resolution lines ahead of the existing
+    launcher rather than replacing it.
+
+Example:
+    bin/rails generate hashed_ports
+
+    This will:
+      - Create bin/find_server_port (chmod 0755)
+      - Inject PORT resolution into bin/dev
+      - Normalize Foreman bin/dev launchers to run through Bundler
+      - Append a "Dev Server Port" section to CLAUDE.md
+
+After running standalone:
+    bundle install              # needed if foreman was added to Gemfile
+
+Resolve the port anytime:
+    bin/find_server_port          # -> e.g. 3712
+    bin/find_server_port --url    # -> http://localhost:3712

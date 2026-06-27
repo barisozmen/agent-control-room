@@ -1,0 +1,177 @@
+module CanonicalRuntimeEvents
+  class Processor
+    def initialize(run:, event:)
+      @run = run
+      @event = event.with_indifferent_access
+    end
+
+    def process
+      case event.fetch(:type)
+      when "session.started" then record_session_started
+      when "actor.delegated" then mint_passport
+      when "tool.requested" then authorize_tool_action
+      when "tool.finished" then finish_tool_action
+      when "tool.blocked" then block_tool_action
+      when "session.finished" then finish_session
+      else
+        raise ArgumentError, "Unknown runtime event type: #{event[:type]}"
+      end
+    end
+
+    private
+
+    attr_reader :run, :event
+
+    def record_session_started
+      run.update!(status: "running", started_at: occurred_at)
+      audit!("session.started", result: "started", action_summary: "opencode session started")
+      run
+    end
+
+    def mint_passport
+      parent = event[:parent_actor_ref].present? ? run.passports.find_by!(actor_ref: event[:parent_actor_ref]) : nil
+      rules = event.fetch(:rules).with_indifferent_access
+
+      passport = run.passports.find_or_create_by!(actor_ref: event.fetch(:actor_ref)) do |record|
+        record.parent = parent
+        record.actor_name = event.fetch(:actor_name)
+        record.actor_kind = event.fetch(:actor_kind)
+        record.provider = event.fetch(:provider)
+        record.task = event[:task]
+        record.status = "active"
+        record.read_rule = rules.fetch(:read)
+        record.edit_rule = rules.fetch(:edit)
+        record.bash_rule = rules.fetch(:bash)
+        record.web_rule = rules.fetch(:web)
+        record.delegate_rule = rules.fetch(:delegate)
+      end
+
+      audit!(
+        "actor.delegated",
+        passport: passport,
+        result: "minted",
+        capability: "delegate",
+        action_summary: "#{passport.actor_name} passport minted"
+      )
+
+      passport
+    end
+
+    def authorize_tool_action
+      passport = run.passports.find_by!(actor_ref: event.fetch(:actor_ref))
+      action = find_or_create_tool_action!(passport)
+
+      return action unless action.status == "requested"
+
+      decision = passport.authorization_for(action.capability, action.request_text)
+
+      case decision
+      when "allow"
+        action.update!(status: "allowed")
+        audit!("tool.allowed", passport: passport, tool_action: action, result: "allowed", capability: action.capability, action_summary: action.action_summary)
+      when "ask"
+        action.update!(status: "asking")
+        request = PermissionRequest.find_or_create_by!(tool_action: action) do |record|
+          record.run = run
+          record.passport = passport
+          record.status = "pending"
+          record.risk_level = event[:risk_level]
+          record.risk_summary = event[:risk_summary]
+          record.suggested_capability = event[:suggested_capability].presence || action.capability
+          record.suggested_pattern = event[:suggested_pattern].presence || action.request_text
+        end
+        audit!("permission.requested", passport: passport, tool_action: action, permission_request: request, result: "ask", capability: action.capability, action_summary: action.action_summary)
+      else
+        action.update!(status: "blocked", finished_at: occurred_at)
+        audit!("tool.blocked", passport: passport, tool_action: action, result: "blocked", capability: action.capability, action_summary: action.action_summary)
+      end
+
+      action
+    end
+
+    def finish_tool_action
+      action = terminal_tool_action
+      action.update!(status: "finished", finished_at: occurred_at, exit_status: event[:exit_status])
+      audit!("tool.finished", passport: action.passport, tool_action: action, result: "finished", capability: action.capability, action_summary: action.action_summary)
+      action
+    end
+
+    def block_tool_action
+      action = terminal_tool_action
+      action.update!(status: "blocked", finished_at: occurred_at)
+      audit!("tool.blocked", passport: action.passport, tool_action: action, result: "blocked", capability: action.capability, action_summary: action.action_summary)
+      action
+    end
+
+    def finish_session
+      run.update!(status: event[:status].presence || "completed", finished_at: occurred_at)
+      audit!("session.finished", result: run.status, action_summary: "opencode session #{run.status}")
+      run
+    end
+
+    def audit!(kind, result:, passport: nil, tool_action: nil, permission_request: nil, capability: nil, action_summary: nil)
+      if event[:event_id].present?
+        AuditEvent.find_or_create_by!(run: run, source_event_id: event[:event_id]) do |record|
+          assign_audit_attributes(record, kind, result, passport, tool_action, permission_request, capability, action_summary)
+        end
+      else
+        AuditEvent.create!(run: run) do |record|
+          assign_audit_attributes(record, kind, result, passport, tool_action, permission_request, capability, action_summary)
+        end
+      end
+    end
+
+    def find_or_create_tool_action!(passport)
+      if event[:event_id].present?
+        run.tool_actions.find_or_create_by!(source_event_id: event[:event_id]) do |record|
+          assign_tool_action_attributes(record, passport)
+        end
+      else
+        run.tool_actions.create! do |record|
+          assign_tool_action_attributes(record, passport)
+        end
+      end
+    end
+
+    def terminal_tool_action
+      source_event_id = event.fetch(:source_event_id)
+      run.tool_actions.find_by(source_event_id: source_event_id) || create_observed_tool_action!(source_event_id)
+    end
+
+    def create_observed_tool_action!(source_event_id)
+      passport = run.passports.find_by!(actor_ref: event.fetch(:actor_ref))
+      run.tool_actions.create!(source_event_id: source_event_id) do |record|
+        assign_tool_action_attributes(record, passport)
+        record.status = "running"
+      end
+    end
+
+    def assign_tool_action_attributes(record, passport)
+      record.passport = passport
+      record.capability = event.fetch(:capability)
+      record.action_kind = event.fetch(:action_kind)
+      record.action_summary = event.fetch(:action_summary)
+      record.command = event[:command]
+      record.path = event[:path]
+      record.canonical_payload = event.to_h
+      record.status = "requested"
+      record.requested_at = occurred_at
+    end
+
+    def assign_audit_attributes(record, kind, result, passport, tool_action, permission_request, capability, action_summary)
+      record.passport = passport
+      record.tool_action = tool_action
+      record.permission_request = permission_request
+      record.event_kind = kind
+      record.actor_lineage = passport&.lineage_label
+      record.capability = capability
+      record.action_summary = action_summary
+      record.result = result
+      record.occurred_at = occurred_at
+    end
+
+    def occurred_at
+      @occurred_at ||= event[:occurred_at].present? ? Time.zone.parse(event[:occurred_at].to_s) : Time.current
+    end
+  end
+end

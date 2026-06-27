@@ -1,0 +1,28 @@
+<%= turbo_frame_tag "permission_inbox" do %>
+  <div class="flex h-full flex-col">
+    <% pending_requests = run.permission_requests.pending.includes(:passport, :tool_action) %>
+    <% active_request = pending_requests.first %>
+    <div class="ap-pane-header">
+      <div class="flex items-end justify-between gap-4">
+        <div>
+          <p class="ap-kicker">current ask</p>
+          <h2 class="ap-pane-title mt-1"><%= active_request.present? ? "Ask 1 of #{pending_requests.size}" : "No pending asks" %></h2>
+        </div>
+        <% if pending_requests.size > 1 %>
+          <span class="ap-mono text-xs ap-muted"><%= pending_requests.size - 1 %> queued</span>
+        <% end %>
+      </div>
+    </div>
+
+    <div class="ap-primary-content">
+      <% if active_request.present? %>
+        <%= render active_request %>
+      <% else %>
+        <div class="ap-empty">
+          <p>no pending asks</p>
+          <p class="mt-2"><%= link_to "Open receipts", run_path(run, panel: "audit"), class: "ap-inline-link", data: { turbo_frame: "_top" } %> for the completed permission story.</p>
+        </div>
+      <% end %>
+    </div>
+  </div>
+<% end %>

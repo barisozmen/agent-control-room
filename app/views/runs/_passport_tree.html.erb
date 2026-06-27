@@ -1,0 +1,24 @@
+<%= turbo_frame_tag "passport_tree" do %>
+  <div class="flex h-full flex-col">
+    <div class="ap-pane-header">
+      <div class="flex items-end justify-between gap-4">
+        <div>
+          <p class="ap-kicker">runtime lineage</p>
+          <h2 class="ap-pane-title mt-1">Runtime lineage</h2>
+        </div>
+        <span class="ap-mono text-xs ap-muted"><%= pluralize(run.passports.where(actor_kind: "agent").count, "agent") %></span>
+      </div>
+    </div>
+
+    <div class="ap-scroll flex-1 overflow-auto p-3">
+      <% root = run.root_passport %>
+      <% if root.present? %>
+        <ol class="space-y-1">
+          <%= render "runs/passport_node", run: run, passport: root, selected_passport: selected_passport, depth: 0 %>
+        </ol>
+      <% else %>
+        <p class="ap-empty">waiting for session.started</p>
+      <% end %>
+    </div>
+  </div>
+<% end %>

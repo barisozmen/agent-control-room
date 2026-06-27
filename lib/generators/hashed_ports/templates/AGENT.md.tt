@@ -1,0 +1,24 @@
+## Dev Server Port (deterministic, hashed)
+
+A single shared dev server is usually already running — **reuse it, don't start
+your own.** A second `bin/dev`/`bin/rails server` fails on `tmp/pids/server.pid`
+("A server is already running") and SIGTERMs the whole foreman group.
+
+**Do not assume port 3000.** This project's dev port is **deterministic**: a hash
+of the folder name into the band `3000..3999`. `bin/dev` boots on it automatically.
+Never guess the port — resolve it:
+
+```bash
+PORT=$(bin/find_server_port)                 # bare port, e.g. 3712
+URL=$(bin/find_server_port --url)            # http://localhost:3712
+curl -s "$(bin/find_server_port --url)/up"   # confirm it's actually up
+```
+
+`bin/find_server_port` (the single source of truth for port assignment) hashes
+the folder name to a stable port; if our server is already running it reports the
+exact live port (recorded in `tmp/pids/dev_server.port`), otherwise it returns the
+hashed slot, walking forward only if another project already holds it. It always
+prints a port — so before relying on the server, confirm it answers (`curl .../up`).
+If nothing is listening, **do not start your own server** — verify changes with
+`bin/rails test` (system tests boot their own random-port server, conflict-free),
+or ask the user to run `bin/dev`.

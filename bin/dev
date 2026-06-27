@@ -1,0 +1,21 @@
+#!/usr/bin/env sh
+
+APP_ROOT="$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)"
+export BUNDLE_GEMFILE="$APP_ROOT/Gemfile"
+
+# Let the debug gem allow remote connections,
+# but avoid loading until `debugger` is called
+export RUBY_DEBUG_OPEN="true"
+export RUBY_DEBUG_LAZY="true"
+
+# Deterministic per-project dev port (hash of the folder name); see
+# bin/find_server_port. Use AGENT_PASSPORTS_PORT for an intentional override so
+# an unrelated shell-level PORT from another app is not inherited.
+export PORT="${AGENT_PASSPORTS_PORT:-$("$APP_ROOT/bin/find_server_port")}"
+
+# Record the chosen port so bin/find_server_port can report the live port
+# (exactly, even under a hash collision) while this server is running.
+mkdir -p "$APP_ROOT/tmp/pids" && printf '%s' "$PORT" > "$APP_ROOT/tmp/pids/dev_server.port"
+
+cd "$APP_ROOT" || exit 1
+exec bundle exec foreman start -f Procfile.dev "$@"

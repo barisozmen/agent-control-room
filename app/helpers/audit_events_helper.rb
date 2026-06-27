@@ -1,0 +1,2 @@
+module AuditEventsHelper
+end

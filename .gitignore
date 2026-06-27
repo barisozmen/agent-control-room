@@ -1,0 +1,72 @@
+# OS files
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+Thumbs.db
+Desktop.ini
+*~
+
+# Editors
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+.cursor/
+.windsurf/
+.zed/
+.opencode/
+
+# Secrets and local environment
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+*.p12
+*.pfx
+*.cer
+*.crt
+/config/master.key
+/config/credentials/*.key
+
+# Logs and temp
+/log/*
+/tmp/*
+!/log/.keep
+!/tmp/.keep
+*.log
+
+# Ruby / Rails
+*.gem
+*.rbc
+.bundle/
+vendor/bundle/
+.byebug_history
+.rspec_status
+/storage/*
+!/storage/.keep
+/public/assets
+/public/packs
+/public/packs-test
+/node_modules
+/yarn-error.log
+/db/*.sqlite3
+/db/*.sqlite3-*
+
+# Docs
+/docs/
+
+# JavaScript
+node_modules/
+.npm
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+.pnp.*

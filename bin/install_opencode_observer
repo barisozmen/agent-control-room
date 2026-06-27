@@ -1,0 +1,39 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require "fileutils"
+require "securerandom"
+
+ROOT = File.expand_path("..", __dir__)
+SOURCE_PLUGIN = File.join(ROOT, "lib", "opencode", "agent-passports-observer.js")
+OPENCODE_DIR = File.expand_path("~/.config/opencode")
+OPENCODE_PLUGIN_DIR = File.join(OPENCODE_DIR, "plugins")
+TARGET_PLUGIN = File.join(OPENCODE_PLUGIN_DIR, "agent-passports-observer.js")
+PASSPORTS_DIR = File.expand_path("~/.config/agent-passports")
+TOKEN_PATH = File.join(PASSPORTS_DIR, "machine-token")
+SERVER_URL_PATH = File.join(PASSPORTS_DIR, "server-url")
+SERVER_URL = ENV["AGENT_PASSPORTS_SERVER_URL"] || `#{File.join(ROOT, "bin", "find_server_port")} --url`.strip.sub("localhost", "127.0.0.1")
+
+abort "Missing observer plugin at #{SOURCE_PLUGIN}" unless File.exist?(SOURCE_PLUGIN)
+
+FileUtils.mkdir_p(OPENCODE_PLUGIN_DIR)
+FileUtils.mkdir_p(PASSPORTS_DIR, mode: 0700)
+
+if File.exist?(TARGET_PLUGIN) && File.read(TARGET_PLUGIN) != File.read(SOURCE_PLUGIN)
+  backup = "#{TARGET_PLUGIN}.bak-#{Time.now.utc.strftime("%Y%m%d%H%M%S")}"
+  FileUtils.cp(TARGET_PLUGIN, backup)
+  warn "Backed up existing observer plugin to #{backup}"
+end
+
+FileUtils.cp(SOURCE_PLUGIN, TARGET_PLUGIN)
+
+unless File.exist?(TOKEN_PATH)
+  File.write(TOKEN_PATH, SecureRandom.urlsafe_base64(32))
+  File.chmod(0600, TOKEN_PATH)
+end
+
+File.write(SERVER_URL_PATH, "#{SERVER_URL}\n")
+
+puts "Installed #{TARGET_PLUGIN}"
+puts "Wrote #{SERVER_URL_PATH} -> #{SERVER_URL}"
+puts "Machine token: #{TOKEN_PATH}"

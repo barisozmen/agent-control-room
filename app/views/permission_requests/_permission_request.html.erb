@@ -1,0 +1,41 @@
+<article id="<%= dom_id(permission_request) %>" class="ap-request-card" data-testid="permission-request" data-actor-ref="<%= permission_request.passport.actor_ref %>">
+  <% passport = permission_request.passport %>
+  <% action = permission_request.tool_action %>
+  <% grant_pattern = permission_request.suggested_grant_pattern %>
+
+  <div class="flex flex-col gap-4">
+    <div class="flex min-w-0 items-start justify-between gap-3">
+      <div class="min-w-0">
+        <p class="ap-kicker">agent</p>
+        <h3 class="mt-1 truncate text-base font-semibold leading-5">
+          <%= link_to passport.actor_name, run_path(permission_request.run, passport_id: passport.id, panel: "passport"), class: "ap-inline-link ap-text-strong", data: { turbo_frame: "_top" } %>
+        </h3>
+        <p class="ap-mono mt-1 truncate text-xs ap-muted"><%= passport.lineage_label %></p>
+      </div>
+      <div class="flex shrink-0 items-center gap-2">
+        <span class="ap-event-chip"><%= action.capability %></span>
+        <span class="<%= risk_badge_classes(permission_request.risk_level) %>"><%= permission_request.risk_level %></span>
+      </div>
+    </div>
+
+    <div class="ap-command">
+      <p class="ap-kicker mb-1">requested action</p>
+      <p class="break-words"><%= action.request_text %></p>
+    </div>
+
+    <% if grant_pattern.present? %>
+      <div class="ap-grant-preview">
+        <p class="ap-kicker">passport grant pattern</p>
+        <p class="ap-mono mt-1 break-words text-xs ap-text-strong"><%= grant_pattern %></p>
+      </div>
+    <% end %>
+
+    <p class="text-sm leading-5 ap-body-muted"><%= permission_request.risk_summary %></p>
+
+    <div class="grid grid-cols-1 gap-2 sm:grid-cols-3">
+      <%= button_to "Allow once", permission_request_decisions_path(permission_request), method: :post, params: { decision: { scope: "allow_once" } }, class: request_decision_button_classes(:primary) %>
+      <%= button_to "Add to passport", permission_request_decisions_path(permission_request), method: :post, params: { decision: { scope: "passport" } }, class: request_decision_button_classes(:secondary) %>
+      <%= button_to "Deny", permission_request_decisions_path(permission_request), method: :post, params: { decision: { scope: "deny" } }, class: request_decision_button_classes(:danger) %>
+    </div>
+  </div>
+</article>

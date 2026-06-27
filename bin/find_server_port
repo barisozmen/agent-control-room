@@ -1,0 +1,78 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+#
+# Resolve THIS project's dev-server port — deterministically, from its folder name.
+#
+# The port is the project's slot in a fixed band (3000..3999), chosen by hashing
+# the folder name. Same folder → same port, every time, with no central registry,
+# so any tool (or AI agent) can find a project's dev server without guessing or
+# scanning ports: it just recomputes the hash. Two projects collide only when
+# their names hash to the same slot; the late starter then walks forward (+1)
+# until it finds a port that is free or already served by itself.
+#
+# This is the SINGLE SOURCE OF TRUTH for dev-port assignment. `bin/dev` boots on
+# `$(bin/find_server_port)` and records the chosen port; any external tool that
+# launches dev servers should do the same instead of recomputing the formula.
+# Keep this algorithm identical across every project that ships it.
+#
+# Usage:
+#   bin/find_server_port          # -> e.g. 3712
+#   bin/find_server_port --url    # -> http://localhost:3712
+#
+require "digest"
+require "socket"
+
+DEV_PORT_RANGE = 3000..3999
+
+# Project root = the directory containing this bin/ script, independent of cwd.
+ROOT      = File.expand_path("..", __dir__)
+NAME      = File.basename(ROOT).downcase
+PID_FILE  = File.join(ROOT, "tmp", "pids", "server.pid")
+PORT_FILE = File.join(ROOT, "tmp", "pids", "dev_server.port")
+
+# Deterministic base port from the folder name (MD5 → slot in the band).
+def base_port
+  DEV_PORT_RANGE.begin + (Digest::MD5.hexdigest(NAME).to_i(16) % DEV_PORT_RANGE.size)
+end
+
+# Is one of our own dev servers currently running? (Rails writes server.pid.)
+def running?
+  Process.kill(0, Integer(File.read(PID_FILE).strip))
+  true
+rescue Errno::EPERM    # the pid exists, we just can't signal it
+  true
+rescue StandardError   # no pidfile, stale/garbage pid, or no such process
+  false
+end
+
+# The port our running server recorded for itself, if any (and in range).
+def recorded_port
+  port = Integer(File.read(PORT_FILE).strip)
+  DEV_PORT_RANGE.include?(port) ? port : nil
+rescue StandardError
+  nil
+end
+
+# Is something already listening on this localhost port?
+def taken?(port)
+  Socket.tcp("127.0.0.1", port, connect_timeout: 0.2) { true }
+rescue StandardError
+  false
+end
+
+def resolve_port
+  # Already running → report where we are (recorded is exact; base is the guess).
+  return recorded_port || base_port if running?
+
+  # Not running → claim our hashed slot, stepping past ports a *different* server
+  # already holds, wrapping within the band.
+  port = base_port
+  DEV_PORT_RANGE.size.times do
+    return port unless taken?(port)
+    port = port == DEV_PORT_RANGE.end ? DEV_PORT_RANGE.begin : port + 1
+  end
+  base_port
+end
+
+port = resolve_port
+puts ARGV.include?("--url") ? "http://localhost:#{port}" : port
