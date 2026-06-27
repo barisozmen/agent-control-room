@@ -24,7 +24,7 @@ module CanonicalRuntimeEvents
 
     def record_session_started
       run.update!(status: "running", started_at: occurred_at)
-      audit!("session.started", result: "started", action_summary: "opencode session started")
+      audit!("session.started", result: "started", action_summary: "#{run.runtime_label} session started")
       run
     end
 
@@ -105,7 +105,7 @@ module CanonicalRuntimeEvents
 
     def finish_session
       run.update!(status: event[:status].presence || "completed", finished_at: occurred_at)
-      audit!("session.finished", result: run.status, action_summary: "opencode session #{run.status}")
+      audit!("session.finished", result: run.status, action_summary: "#{run.runtime_label} session #{run.status}")
       run
     end
 

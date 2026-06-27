@@ -6,7 +6,11 @@
         <h1 class="ap-mono text-2xl font-medium leading-tight ap-text-strong">Agent Control Room</h1>
       </div>
 
-      <%= button_to "Start demo run", runs_path, method: :post, class: command_button_classes(:primary) %>
+      <div class="flex flex-wrap items-center gap-2">
+        <% RuntimeAdapters::Registry.options.each_with_index do |runtime, index| %>
+          <%= button_to "#{runtime.label} demo", runs_path, params: { runtime_name: runtime.name }, method: :post, class: command_button_classes(index.zero? ? :primary : :secondary) %>
+        <% end %>
+      </div>
     </div>
   </div>
 
@@ -18,10 +22,12 @@
     <div class="grid min-h-[calc(100dvh-73px)] place-items-center px-4 lg:col-span-2">
       <div class="ap-inspector-box ap-subtle-panel w-full max-w-[720px] p-6" data-testid="empty-start-panel">
         <p class="ap-kicker">no sessions yet</p>
-        <h2 class="mt-2 text-3xl font-medium leading-tight ap-text-strong">OpenCode observer is waiting</h2>
-        <p class="ap-mono mt-3 text-sm ap-body-muted">start any opencode session on this computer, or run the scripted demo</p>
-        <div class="mt-5">
-          <%= button_to "Start demo run", runs_path, method: :post, class: command_button_classes(:primary) %>
+        <h2 class="mt-2 text-3xl font-medium leading-tight ap-text-strong">Runtime observer is waiting</h2>
+        <p class="ap-mono mt-3 text-sm ap-body-muted">start an observed runtime session on this computer, or run a scripted demo</p>
+        <div class="mt-5 flex flex-wrap gap-2">
+          <% RuntimeAdapters::Registry.options.each_with_index do |runtime, index| %>
+            <%= button_to "#{runtime.label} demo", runs_path, params: { runtime_name: runtime.name }, method: :post, class: command_button_classes(index.zero? ? :primary : :secondary) %>
+          <% end %>
         </div>
       </div>
     </div>

@@ -3,7 +3,7 @@
     <div class="ap-pane-header">
       <div class="flex items-end justify-between gap-4">
         <div>
-          <p class="ap-kicker">opencode sessions</p>
+          <p class="ap-kicker">runtime sessions</p>
           <h2 class="ap-pane-title mt-1">Sessions</h2>
         </div>
         <span class="ap-mono text-xs ap-muted"><%= runs.size %></span>
@@ -22,7 +22,7 @@
                   <span class="block truncate text-sm font-semibold ap-text-strong"><%= run.display_title %></span>
                   <span class="ap-mono mt-1 block truncate text-xs ap-muted"><%= run.display_project %></span>
                   <span class="ap-mono mt-1 block truncate text-xs ap-body-muted">
-                    <%= run.runtime_session_id.presence || "demo-run-#{run.id}" %>
+                    <%= run.runtime_label %> / <%= run.runtime_session_id.presence || "demo-run-#{run.id}" %>
                   </span>
                 </span>
                 <% if run.permission_requests.pending.exists? %>
@@ -33,7 +33,7 @@
           <% end %>
         </ol>
       <% else %>
-        <p class="ap-empty">no opencode sessions observed</p>
+        <p class="ap-empty">no runtime sessions observed</p>
       <% end %>
     </div>
   </div>

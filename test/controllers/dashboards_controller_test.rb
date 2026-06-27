@@ -7,8 +7,10 @@ class DashboardsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
     assert_select "h1", text: "Agent Control Room"
     assert_select "[data-testid='empty-start-panel']"
-    assert_select "h2", text: "OpenCode observer is waiting"
-    assert_select "button", text: "Start demo run"
+    assert_select "h2", text: "Runtime observer is waiting"
+    assert_select "button", text: "OpenCode demo"
+    assert_select "button", text: "Claude Code demo"
+    assert_select "button", text: "Codex demo"
     assert_select "turbo-frame#session_sidebar"
   end
 
@@ -59,6 +61,7 @@ class DashboardsControllerTest < ActionDispatch::IntegrationTest
     assert_select "turbo-frame#session_sidebar" do
       assert_select "a[href='#{run_path(first)}']", text: /First project/
       assert_select "a[href='#{run_path(second)}']", text: /Second project/
+      assert_select "a[href='#{run_path(second)}']", text: /OpenCode/
       assert_select ".ap-session-row-selected", text: /Second project/
     end
   end

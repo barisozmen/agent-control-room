@@ -1,6 +1,6 @@
 class Passport < ApplicationRecord
   ACTOR_KINDS = %w[human agent].freeze
-  PROVIDERS = %w[local opencode].freeze
+  PROVIDERS = %w[local opencode claude_code codex].freeze
   RULES = %w[deny ask allow].freeze
   CAPABILITIES = %w[read edit bash web delegate].freeze
   RULE_RANK = { "deny" => 0, "ask" => 1, "allow" => 2 }.freeze

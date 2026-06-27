@@ -4,7 +4,7 @@ class ControlRoomFlowsTest < ActionDispatch::IntegrationTest
   test "community demo flow starts, decides asks, and leaves an audit story" do
     get root_path
     assert_response :success
-    assert_select "button", text: "Start demo run"
+    assert_select "button", text: "OpenCode demo"
 
     assert_difference -> { Run.count }, 1 do
       post runs_path

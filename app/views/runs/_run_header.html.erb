@@ -15,7 +15,7 @@
           <p class="ap-mono mt-2 break-words text-xs ap-result-negative"><%= run.error_message %></p>
         <% end %>
         <% if run.failed? %>
-          <p class="ap-mono mt-2 break-words text-xs ap-body-muted">Install opencode or set AGENT_PASSPORTS_OPENCODE, then retry the demo.</p>
+          <p class="ap-mono mt-2 break-words text-xs ap-body-muted"><%= run.runtime_setup_guidance %></p>
         <% end %>
       </div>
 
@@ -24,7 +24,7 @@
         <% if run.active? %>
           <span class="ap-mono text-xs ap-muted">run in progress</span>
         <% else %>
-          <%= button_to run.failed? ? "Retry demo run" : "New demo run", runs_path, method: :post, class: command_button_classes(:secondary), form: { data: { turbo_frame: "_top" } } %>
+          <%= button_to run.failed? ? "Retry #{run.runtime_label} demo" : "New #{run.runtime_label} demo", runs_path, params: { runtime_name: run.runtime_name }, method: :post, class: command_button_classes(:secondary), form: { data: { turbo_frame: "_top" } } %>
         <% end %>
       </div>
     </div>

@@ -18,9 +18,9 @@ module ActiveSupport
       RuntimeAdapters::OpencodeDemo.start!(project_path: Rails.root.to_s)
     end
 
-    def create_run
+    def create_run(runtime_name: "opencode")
       Run.create!(
-        runtime_name: "opencode",
+        runtime_name: runtime_name,
         project_path: Rails.root.to_s,
         mode: "demo",
         status: "running",

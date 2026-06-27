@@ -9,6 +9,7 @@ class Run < ApplicationRecord
 
   validates :runtime_name, :project_path, :mode, :status, presence: true
   validates :bridge_token, presence: true, uniqueness: true
+  validates :runtime_name, inclusion: { in: RuntimeAdapters::Registry.names }
   validates :status, inclusion: { in: STATUSES }
   validates :mode, inclusion: { in: MODES }
 
@@ -42,6 +43,18 @@ class Run < ApplicationRecord
     title.presence || "#{runtime_name} #{id}"
   end
 
+  def runtime
+    RuntimeAdapters::Registry.fetch(runtime_name)
+  end
+
+  def runtime_label
+    runtime.label
+  end
+
+  def runtime_setup_guidance
+    "Install #{runtime.label} or set #{runtime.command_env_key}, then retry the demo."
+  end
+
   def display_project
     Pathname.new(project_path).basename.to_s
   rescue StandardError
@@ -56,7 +69,7 @@ class Run < ApplicationRecord
     broadcast_replace_to self, target: "passport_tree", partial: "runs/passport_tree", locals: { run: self, selected_passport: selected_passport }
     broadcast_replace_to self, target: "permission_inbox", partial: "runs/permission_inbox", locals: { run: self }
     broadcast_replace_to self, target: "audit_timeline", partial: "runs/audit_timeline", locals: { run: self, audit_events: audit_events.chronological }
-    broadcast_replace_to "opencode_sessions", target: "session_sidebar", partial: "runs/session_sidebar", locals: { runs: Run.session_list, selected_run: nil }
+    broadcast_replace_to "runtime_sessions", target: "session_sidebar", partial: "runs/session_sidebar", locals: { runs: Run.session_list, selected_run: nil }
 
     return unless selected_passport.present?
 

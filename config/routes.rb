@@ -19,5 +19,6 @@ Rails.application.routes.draw do
   end
 
   resources :runtime_events, only: :create
+  post "runtime/:runtime_name/events" => "runtime_observer_events#create", as: :runtime_observer_events
   post "opencode/events" => "opencode_events#create", as: :opencode_events
 end

@@ -35,7 +35,7 @@ class PermissionDecisionsController < ApplicationController
       run: @run,
       event_kind: "session.finished",
       result: "completed",
-      action_summary: "opencode demo completed after all permission requests resolved",
+      action_summary: "#{@run.runtime_label} demo completed after all permission requests resolved",
       occurred_at: Time.current
     )
   end

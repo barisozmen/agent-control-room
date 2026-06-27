@@ -5,7 +5,7 @@ class CommunityDemoSystemTest < ApplicationSystemTestCase
     visit root_path
 
     within("[data-testid='empty-start-panel']") do
-      click_button "Start demo run"
+      click_button "OpenCode demo"
     end
 
     assert_selector "turbo-frame#passport_tree", text: "opencode/main-agent"
