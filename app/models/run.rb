@@ -1,4 +1,27 @@
 class Run < ApplicationRecord
+  PassportTree = Data.define(:root_passport, :children_by_parent_id, :child_counts_by_passport_id, :agent_count, :passport_by_id, :passport_by_actor_ref) do
+    def children_for(passport)
+      return [] if passport.blank?
+
+      children_by_parent_id.fetch(passport.id) { [] }
+    end
+
+    def child_count_for(passport)
+      return 0 if passport.blank?
+
+      child_counts_by_passport_id.fetch(passport.id, 0)
+    end
+
+    def selected_passport(passport_id = nil)
+      if passport_id.present?
+        selected = passport_by_id[passport_id.to_i]
+        return selected if selected.present?
+      end
+
+      passport_by_actor_ref["security-auditor"] || passport_by_actor_ref["main-agent"] || root_passport
+    end
+  end
+
   STATUSES = %w[starting running completed interrupted failed].freeze
   MODES = %w[demo manual observed].freeze
 
@@ -39,6 +62,25 @@ class Run < ApplicationRecord
     passports.find_by(id: passport_id) || passports.find_by(actor_ref: "security-auditor") || passports.find_by(actor_ref: "main-agent") || root_passport
   end
 
+  def passport_tree
+    ordered_passports = passports.order(:created_at, :id).to_a
+    children_by_parent_id = ordered_passports.group_by(&:parent_id)
+    child_counts_by_passport_id = children_by_parent_id.each_with_object({}) do |(parent_id, children), counts|
+      next if parent_id.nil?
+
+      counts[parent_id] = children.size
+    end
+
+    PassportTree.new(
+      root_passport: children_by_parent_id.fetch(nil) { [] }.first,
+      children_by_parent_id: children_by_parent_id,
+      child_counts_by_passport_id: child_counts_by_passport_id,
+      agent_count: ordered_passports.count(&:agent?),
+      passport_by_id: ordered_passports.index_by(&:id),
+      passport_by_actor_ref: ordered_passports.index_by(&:actor_ref)
+    )
+  end
+
   def display_title
     title.presence || "#{runtime_name} #{id}"
   end
@@ -62,11 +104,12 @@ class Run < ApplicationRecord
   end
 
   def broadcast_control_room!(selected_passport: nil)
-    selected_passport ||= self.selected_passport
+    passport_tree = self.passport_tree
+    selected_passport ||= passport_tree.selected_passport
 
     broadcast_session_sidebar!
     broadcast_replace_to self, target: "run_header", partial: "runs/run_header", locals: { run: self }
-    broadcast_replace_to self, target: "passport_tree", partial: "runs/passport_tree", locals: { run: self, selected_passport: selected_passport }
+    broadcast_replace_to self, target: "passport_tree", partial: "runs/passport_tree", locals: { run: self, selected_passport: selected_passport, passport_tree: passport_tree }
     broadcast_replace_to self, target: "permission_inbox", partial: "runs/permission_inbox", locals: { run: self }
     broadcast_replace_to self, target: "audit_timeline", partial: "runs/audit_timeline", locals: { run: self, audit_events: audit_events.chronological }
 
