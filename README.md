@@ -1,4 +1,4 @@
-# Agent Control Room
+# Agent Identity Control Room
 
 Observe agent sessions on your computer, inspect agent and subagent lineage, pause risky tool actions, approve or deny requests, grant scoped permissions, and review tamper-evident audit receipts.
 
@@ -145,3 +145,20 @@ env -u BUNDLE_GEMFILE -u BUNDLE_BIN_PATH bin/rails test:all
 ## Core Rule
 
 The agent runtime does the work. Agent Control Room observes, explains, gates, and records authority.
+
+## What We Need Next
+
+Agent Control Room needs contributions that turn the prototype into a dependable local control plane for real coding-agent work.
+
+We would love help with:
+
+- Full per-tool permission bridges for Claude Code and Codex.
+- Additional runtime adapters that emit the canonical event contract.
+- Stronger OpenCode hook coverage, failure handling, and adapter tests.
+- Clearer passport scope previews for commands, files, network access, and project paths.
+- Better UI states for empty sessions, missing runtimes, denied actions, completed runs, and long audit timelines.
+- Exportable audit receipts that make post-run review and sharing easier.
+- Setup and troubleshooting docs for fresh clones, different shells, and different agent CLIs.
+- Security hardening for any future mode beyond loopback-only local development.
+
+See `CONTRIBUTING.md` for setup, testing, architecture rules, and contribution guidelines.
