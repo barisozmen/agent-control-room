@@ -4,9 +4,10 @@ Agent Control Room is a local control surface for coding agents.
 
 It observes agent sessions on your computer, shows the agent and subagent lineage, pauses risky tool actions for approval, lets you grant scoped authority, and records audit receipts for what happened.
 
-The v1 prototype is OpenCode-first: a Rails control room plus an OpenCode observer. The core model is runtime-neutral so Claude Code, Codex, or another CLI can plug in later through the same event contract.
 
 ![Agent Control Room showing OpenCode sessions, runtime lineage, passport authority, and receipts](.github/assets/agent-control-room-working.png)
+
+The v1 prototype is OpenCode-first: a Rails control room plus an OpenCode observer. The core model is runtime-neutral so Claude Code, Codex, or another CLI can plug in later through the same event contract.
 
 ## What It Does
 
