@@ -5,6 +5,7 @@ class DashboardsControllerTest < ActionDispatch::IntegrationTest
     get root_path
 
     assert_response :success
+    assert_select "meta[name='robots'][content='noindex, nofollow']", count: 1
     assert_select "h1", text: "Agent Control Room"
     assert_select "[data-testid='empty-start-panel']"
     assert_select "h2", text: "Runtime observer is waiting"
