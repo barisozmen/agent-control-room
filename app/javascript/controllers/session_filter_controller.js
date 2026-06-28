@@ -1,20 +1,29 @@
 import { Controller } from "@hotwired/stimulus"
 
 const DEFAULT_FILTER = "all"
-const FILTERS = new Set([DEFAULT_FILTER, "codex", "opencode"])
+const RUNTIME_FILTERS = new Set([DEFAULT_FILTER, "codex", "opencode"])
+const STATUS_FILTERS = new Set([DEFAULT_FILTER, "running", "completed"])
+const RUNNING_STATUSES = new Set(["starting", "running"])
 
 export default class extends Controller {
   static targets = ["button", "empty", "group", "item", "project"]
-  static values = { storageKey: String }
+  static values = { storageKey: String, statusStorageKey: String }
 
   connect() {
-    this.currentFilter = this.normalize(this.read() || DEFAULT_FILTER)
+    this.currentRuntimeFilter = this.normalizeRuntime(this.read(this.runtimeStorageKey) || DEFAULT_FILTER)
+    this.currentStatusFilter = this.normalizeStatus(this.read(this.statusStorageKey) || DEFAULT_FILTER)
     this.apply()
   }
 
-  select(event) {
-    this.currentFilter = this.normalize(event.currentTarget.dataset.sessionFilterRuntimeValue)
-    this.write(this.currentFilter)
+  selectRuntime(event) {
+    this.currentRuntimeFilter = this.normalizeRuntime(event.currentTarget.dataset.sessionFilterRuntimeValue)
+    this.write(this.runtimeStorageKey, this.currentRuntimeFilter)
+    this.apply()
+  }
+
+  selectStatus(event) {
+    this.currentStatusFilter = this.normalizeStatus(event.currentTarget.dataset.sessionFilterStatusValue)
+    this.write(this.statusStorageKey, this.currentStatusFilter)
     this.apply()
   }
 
@@ -36,7 +45,18 @@ export default class extends Controller {
   }
 
   itemMatches(item) {
-    return this.currentFilter === DEFAULT_FILTER || item.dataset.runtimeName === this.currentFilter
+    return this.runtimeMatches(item) && this.statusMatches(item)
+  }
+
+  runtimeMatches(item) {
+    return this.currentRuntimeFilter === DEFAULT_FILTER || item.dataset.runtimeName === this.currentRuntimeFilter
+  }
+
+  statusMatches(item) {
+    if (this.currentStatusFilter === DEFAULT_FILTER) return true
+    if (this.currentStatusFilter === "running") return RUNNING_STATUSES.has(item.dataset.runStatus)
+
+    return item.dataset.runStatus === this.currentStatusFilter
   }
 
   hasVisibleItem(container) {
@@ -45,10 +65,18 @@ export default class extends Controller {
 
   updateButtons() {
     this.buttonTargets.forEach((button) => {
-      const active = this.normalize(button.dataset.sessionFilterRuntimeValue) === this.currentFilter
+      const active = this.buttonActive(button)
       button.classList.toggle("ap-quiet-link-active", active)
       button.setAttribute("aria-pressed", active ? "true" : "false")
     })
+  }
+
+  buttonActive(button) {
+    if (button.dataset.sessionFilterRuntimeValue !== undefined) {
+      return this.normalizeRuntime(button.dataset.sessionFilterRuntimeValue) === this.currentRuntimeFilter
+    }
+
+    return this.normalizeStatus(button.dataset.sessionFilterStatusValue) === this.currentStatusFilter
   }
 
   updateEmptyState() {
@@ -57,28 +85,37 @@ export default class extends Controller {
     this.emptyTarget.hidden = this.projectTargets.some((project) => !project.hidden)
   }
 
-  normalize(value) {
+  normalizeRuntime(value) {
     const filter = String(value || DEFAULT_FILTER)
-    return FILTERS.has(filter) ? filter : DEFAULT_FILTER
+    return RUNTIME_FILTERS.has(filter) ? filter : DEFAULT_FILTER
   }
 
-  read() {
+  normalizeStatus(value) {
+    const filter = String(value || DEFAULT_FILTER)
+    return STATUS_FILTERS.has(filter) ? filter : DEFAULT_FILTER
+  }
+
+  read(key) {
     try {
-      return localStorage.getItem(this.storageKey)
+      return localStorage.getItem(key)
     } catch {
       return null
     }
   }
 
-  write(value) {
+  write(key, value) {
     try {
-      localStorage.setItem(this.storageKey, value)
+      localStorage.setItem(key, value)
     } catch {
       // Storage can be unavailable in private browsing; filtering still works.
     }
   }
 
-  get storageKey() {
+  get runtimeStorageKey() {
     return this.hasStorageKeyValue ? this.storageKeyValue : "agent-control-room:session-runtime-filter"
+  }
+
+  get statusStorageKey() {
+    return this.hasStatusStorageKeyValue ? this.statusStorageKeyValue : "agent-control-room:session-status-filter"
   }
 }

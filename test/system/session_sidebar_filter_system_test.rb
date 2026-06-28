@@ -8,7 +8,7 @@ class SessionSidebarFilterSystemTest < ApplicationSystemTestCase
     options.add_argument("--force-prefers-reduced-motion")
   end
 
-  test "developer filters the session sidebar by runtime" do
+  test "developer filters the session sidebar by status and runtime" do
     codex = Run.create!(
       runtime_name: "codex",
       runtime_session_id: "session-codex",
@@ -29,6 +29,17 @@ class SessionSidebarFilterSystemTest < ApplicationSystemTestCase
       started_at: 2.minutes.ago,
       last_seen_at: 2.minutes.ago
     )
+    completed = Run.create!(
+      runtime_name: "opencode",
+      runtime_session_id: "session-completed",
+      title: "Completed review",
+      project_path: "/tmp/shared-project",
+      mode: "observed",
+      status: "completed",
+      started_at: 4.minutes.ago,
+      finished_at: 30.seconds.ago,
+      last_seen_at: 30.seconds.ago
+    )
     Run.create!(
       runtime_name: "claude_code",
       runtime_session_id: "session-claude",
@@ -44,15 +55,39 @@ class SessionSidebarFilterSystemTest < ApplicationSystemTestCase
 
     within "turbo-frame#session_sidebar" do
       assert_selector "button[aria-pressed='true']", text: "All"
+      assert_selector "button[aria-pressed='true']", text: "Any"
       assert_selector "a.ap-session-row[href='#{run_path(codex)}']", text: "Codex"
       assert_selector "a.ap-session-row[href='#{run_path(opencode)}']", text: "Review permissions"
+      assert_selector "a.ap-session-row[href='#{run_path(completed)}']", text: "Completed review"
       assert_selector ".ap-session-row", text: "Claude investigation"
+
+      click_button "Running"
+
+      assert_selector "button[aria-pressed='true']", text: "Running"
+      assert_selector "a.ap-session-row[href='#{run_path(codex)}']", text: "Codex"
+      assert_selector "a.ap-session-row[href='#{run_path(opencode)}']", text: "Review permissions"
+      assert_no_selector "a.ap-session-row[href='#{run_path(completed)}']", text: "Completed review"
+
+      click_button "Completed"
+
+      assert_selector "button[aria-pressed='true']", text: "Completed"
+      assert_no_selector "a.ap-session-row[href='#{run_path(codex)}']", text: "Codex"
+      assert_no_selector "a.ap-session-row[href='#{run_path(opencode)}']", text: "Review permissions"
+      assert_selector "a.ap-session-row[href='#{run_path(completed)}']", text: "Completed review"
+
+      click_button "All"
+
+      assert_selector "button[aria-pressed='true']", text: "All"
+      assert_selector "a.ap-session-row[href='#{run_path(codex)}']", text: "Codex"
+      assert_selector "a.ap-session-row[href='#{run_path(opencode)}']", text: "Review permissions"
+      assert_selector "a.ap-session-row[href='#{run_path(completed)}']", text: "Completed review"
 
       click_button "Codex"
 
       assert_selector "button[aria-pressed='true']", text: "Codex"
       assert_selector "a.ap-session-row[href='#{run_path(codex)}']", text: "Codex"
       assert_no_selector "a.ap-session-row[href='#{run_path(opencode)}']", text: "Review permissions"
+      assert_no_selector "a.ap-session-row[href='#{run_path(completed)}']", text: "Completed review"
       assert_no_selector ".ap-session-row", text: "Claude investigation"
 
       click_button "Opencode"
@@ -60,13 +95,15 @@ class SessionSidebarFilterSystemTest < ApplicationSystemTestCase
       assert_selector "button[aria-pressed='true']", text: "Opencode"
       assert_no_selector "a.ap-session-row[href='#{run_path(codex)}']", text: "Codex"
       assert_selector "a.ap-session-row[href='#{run_path(opencode)}']", text: "Review permissions"
+      assert_selector "a.ap-session-row[href='#{run_path(completed)}']", text: "Completed review"
       assert_no_selector ".ap-session-row", text: "Claude investigation"
 
-      click_button "All"
+      click_button "Any"
 
-      assert_selector "button[aria-pressed='true']", text: "All"
+      assert_selector "button[aria-pressed='true']", text: "Any"
       assert_selector "a.ap-session-row[href='#{run_path(codex)}']", text: "Codex"
       assert_selector "a.ap-session-row[href='#{run_path(opencode)}']", text: "Review permissions"
+      assert_selector "a.ap-session-row[href='#{run_path(completed)}']", text: "Completed review"
       assert_selector ".ap-session-row", text: "Claude investigation"
     end
   end

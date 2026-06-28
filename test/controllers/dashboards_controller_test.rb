@@ -103,10 +103,17 @@ class DashboardsControllerTest < ActionDispatch::IntegrationTest
     get run_path(second)
 
     assert_response :success
-    assert_select "turbo-frame#session_sidebar[data-controller~='session-filter'][data-session-filter-storage-key-value='agent-control-room:session-runtime-filter']" do
-      assert_select "button[data-session-filter-target='button'][data-session-filter-runtime-value='all'][aria-pressed='true']", text: "All"
-      assert_select "button[data-session-filter-target='button'][data-session-filter-runtime-value='codex']", text: "Codex"
-      assert_select "button[data-session-filter-target='button'][data-session-filter-runtime-value='opencode']", text: "Opencode"
+    assert_select "turbo-frame#session_sidebar[data-controller~='session-filter'][data-session-filter-storage-key-value='agent-control-room:session-runtime-filter'][data-session-filter-status-storage-key-value='agent-control-room:session-status-filter']" do
+      assert_select "[role='group'][aria-label='Filter sessions by status']" do
+        assert_select "button[data-session-filter-target='button'][data-session-filter-status-value='all'][aria-pressed='true']", text: "All"
+        assert_select "button[data-session-filter-target='button'][data-session-filter-status-value='running']", text: "Running"
+        assert_select "button[data-session-filter-target='button'][data-session-filter-status-value='completed']", text: "Completed"
+      end
+      assert_select "[role='group'][aria-label='Filter sessions by runtime']" do
+        assert_select "button[data-session-filter-target='button'][data-session-filter-runtime-value='all'][aria-pressed='true']", text: "Any"
+        assert_select "button[data-session-filter-target='button'][data-session-filter-runtime-value='codex']", text: "Codex"
+        assert_select "button[data-session-filter-target='button'][data-session-filter-runtime-value='opencode']", text: "Opencode"
+      end
       assert_select ".ap-session-project", 2
       assert_select ".ap-session-project", text: /shared-project/ do
         assert_select "details[open][data-controller~='collapsible-project'][data-action='toggle->collapsible-project#save']"
@@ -114,9 +121,9 @@ class DashboardsControllerTest < ActionDispatch::IntegrationTest
         assert_select "summary"
         assert_select "h3", text: "shared-project"
         assert_select "p", text: "/tmp/shared-project"
-        assert_select "li[data-session-filter-target='item'][data-runtime-name='codex'] a[href='#{run_path(first)}']", text: /Codex/
+        assert_select "li[data-session-filter-target='item'][data-runtime-name='codex'][data-run-status='running'] a[href='#{run_path(first)}']", text: /Codex/
         assert_select "a[href='#{run_path(first)}']", text: /Codex: shared-project/, count: 0
-        assert_select "li[data-session-filter-target='item'][data-runtime-name='opencode'] a[href='#{run_path(second)}']", text: /Review permissions/
+        assert_select "li[data-session-filter-target='item'][data-runtime-name='opencode'][data-run-status='running'] a[href='#{run_path(second)}']", text: /Review permissions/
         assert_select ".ap-session-row-selected", text: /Review permissions/
         assert_select ".ap-session-visible-list a[href='#{run_path(killed)}']", count: 0
         assert_select "details.ap-session-killed-details:not([open])[data-session-filter-target~='group'][data-controller~='collapsible-project'][data-action='toggle->collapsible-project#save']" do

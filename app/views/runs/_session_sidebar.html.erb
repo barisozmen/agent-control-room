@@ -1,6 +1,7 @@
 <turbo-frame id="session_sidebar"
              data-controller="session-filter"
-             data-session-filter-storage-key-value="agent-control-room:session-runtime-filter">
+             data-session-filter-storage-key-value="agent-control-room:session-runtime-filter"
+             data-session-filter-status-storage-key-value="agent-control-room:session-status-filter">
   <% pending_counts_by_run_id = local_assigns.fetch(:pending_counts_by_run_id) { {} } %>
 
   <div class="flex h-full flex-col">
@@ -12,13 +13,26 @@
         <span class="ap-mono text-xs ap-muted"><%= runs.size %></span>
       </div>
 
-      <div class="mt-3 flex flex-wrap gap-1" role="group" aria-label="Filter runtime sessions">
-        <% [["all", "All"], ["codex", "Codex"], ["opencode", "Opencode"]].each do |runtime_filter, label| %>
+      <div class="mt-3 flex flex-wrap gap-1" role="group" aria-label="Filter sessions by status">
+        <% [["all", "All"], ["running", "Running"], ["completed", "Completed"]].each do |status_filter, label| %>
+          <button type="button"
+                  class="ap-quiet-link <%= "ap-quiet-link-active" if status_filter == "all" %>"
+                  data-session-filter-target="button"
+                  data-session-filter-status-value="<%= status_filter %>"
+                  data-action="session-filter#selectStatus"
+                  aria-pressed="<%= status_filter == "all" %>">
+            <%= label %>
+          </button>
+        <% end %>
+      </div>
+
+      <div class="mt-2 flex flex-wrap gap-1" role="group" aria-label="Filter sessions by runtime">
+        <% [["all", "Any"], ["codex", "Codex"], ["opencode", "Opencode"]].each do |runtime_filter, label| %>
           <button type="button"
                   class="ap-quiet-link <%= "ap-quiet-link-active" if runtime_filter == "all" %>"
                   data-session-filter-target="button"
                   data-session-filter-runtime-value="<%= runtime_filter %>"
-                  data-action="session-filter#select"
+                  data-action="session-filter#selectRuntime"
                   aria-pressed="<%= runtime_filter == "all" %>">
             <%= label %>
           </button>

@@ -1,7 +1,7 @@
 <% selected = selected_run&.id == run.id %>
 <% pending_count = pending_counts_by_run_id.fetch(run.id, 0) %>
 
-<li data-session-filter-target="item" data-runtime-name="<%= run.runtime_name %>">
+<li data-session-filter-target="item" data-runtime-name="<%= run.runtime_name %>" data-run-status="<%= run.status %>">
   <% link_options = { class: "ap-session-row #{selected ? "ap-session-row-selected" : ""}", data: { turbo_frame: "_top" } } %>
   <% link_options[:aria] = { current: "page" } if selected %>
   <%= link_to run_path(run), link_options do %>

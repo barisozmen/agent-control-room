@@ -1,7 +1,7 @@
 <main class="ap-shell min-h-dvh <%= "ap-shell-drawer-open" if @panel.present? %>" <% if @panel.present? %>data-controller="drawer" data-drawer-close-url-value="<%= run_path(@run, passport_id: @selected_passport&.id) %>"<% end %>>
   <%= turbo_stream_from @run %>
 
-  <div data-drawer-target="background" <%= "inert" if @panel.present? %>>
+  <div data-drawer-target="background">
     <%= render "runs/run_header", run: @run %>
 
     <section class="ap-workspace"
@@ -64,7 +64,7 @@
   </div>
 
   <% if @panel.present? %>
-    <aside class="ap-drawer ap-drawer-open" role="dialog" aria-modal="true" aria-labelledby="<%= @panel == "audit" ? "audit-drawer-title" : @panel == "tools" ? "tools-drawer-title" : "passport-drawer-title" %>" data-drawer-target="dialog" data-action="keydown@window->drawer#handleKeydown">
+    <aside class="ap-drawer ap-drawer-open" role="dialog" aria-labelledby="<%= @panel == "audit" ? "audit-drawer-title" : @panel == "tools" ? "tools-drawer-title" : "passport-drawer-title" %>" data-drawer-target="dialog" data-action="keydown@window->drawer#handleKeydown">
       <div class="ap-drawer-panel" tabindex="-1" data-drawer-target="panel">
         <div class="ap-drawer-topbar">
           <div class="flex items-center gap-2">

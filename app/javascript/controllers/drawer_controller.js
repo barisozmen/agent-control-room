@@ -15,17 +15,21 @@ export default class extends Controller {
 
   connect() {
     this.previouslyFocusedElement = document.activeElement
-    this.backgroundTarget.inert = true
-    this.backgroundTarget.setAttribute("aria-hidden", "true")
     this.beforeCache = this.beforeCache.bind(this)
+    this.updateModality = this.updateModality.bind(this)
+    this.compactDrawerQuery = window.matchMedia("(max-width: 640px)")
     document.addEventListener("turbo:before-cache", this.beforeCache)
+    this.compactDrawerQuery.addEventListener("change", this.updateModality)
+    this.updateModality()
 
     requestAnimationFrame(() => this.focusInitialElement())
   }
 
   disconnect() {
     document.removeEventListener("turbo:before-cache", this.beforeCache)
+    this.compactDrawerQuery?.removeEventListener("change", this.updateModality)
     this.restoreBackground()
+    this.dialogTarget.removeAttribute("aria-modal")
     this.restoreFocus()
   }
 
@@ -36,7 +40,7 @@ export default class extends Controller {
       return
     }
 
-    if (event.key === "Tab") {
+    if (event.key === "Tab" && this.modal) {
       this.trapTab(event)
     }
   }
@@ -58,6 +62,19 @@ export default class extends Controller {
     const target = focusable || this.panelTarget
 
     target.focus({ preventScroll: true })
+  }
+
+  updateModality() {
+    this.modal = this.compactDrawerQuery.matches
+
+    if (this.modal) {
+      this.backgroundTarget.inert = true
+      this.backgroundTarget.setAttribute("aria-hidden", "true")
+      this.dialogTarget.setAttribute("aria-modal", "true")
+    } else {
+      this.restoreBackground()
+      this.dialogTarget.removeAttribute("aria-modal")
+    }
   }
 
   trapTab(event) {
