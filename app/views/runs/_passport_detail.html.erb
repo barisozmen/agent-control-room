@@ -51,10 +51,18 @@
           <% if passport.grants.any? %>
             <div class="mt-3 space-y-2">
               <% passport.grants.order(:capability, :pattern).each do |grant| %>
-                <div class="ap-inspector-box ap-subtle-panel px-3 py-2">
+                <div class="ap-inspector-box ap-subtle-panel px-3 py-2" data-testid="passport-grant" data-grant-id="<%= grant.id %>">
                   <div class="flex items-start justify-between gap-3">
-                    <span class="ap-mono text-xs font-medium ap-text-strong"><%= grant.capability %></span>
-                    <span class="ap-mono text-xs ap-result-positive"><%= grant.effect %></span>
+                    <div class="min-w-0">
+                      <span class="ap-mono text-xs font-medium ap-text-strong"><%= grant.capability %></span>
+                      <span class="ap-mono ml-4 text-xs ap-result-positive"><%= grant.effect %></span>
+                    </div>
+                    <%= button_to "Revoke grant",
+                      run_passport_grant_path(run, passport, grant),
+                      method: :delete,
+                      class: command_button_classes(:danger),
+                      form: { data: { turbo_confirm: "Revoke this passport grant? Future matching actions will ask again." } },
+                      aria: { label: "Revoke #{grant.capability} grant #{grant.pattern}" } %>
                   </div>
                   <p class="ap-mono mt-1 break-words text-xs ap-body-muted"><%= grant.pattern %></p>
                 </div>

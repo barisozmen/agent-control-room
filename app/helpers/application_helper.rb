@@ -52,7 +52,7 @@ module ApplicationHelper
     case result
     when "allowed", "running", "finished", "minted", "started", "completed" then "ap-result-positive"
     when "ask" then "ap-result-warning"
-    when "denied", "blocked", "failed", "interrupted" then "ap-result-negative"
+    when "denied", "blocked", "failed", "interrupted", "revoked" then "ap-result-negative"
     else "ap-result-neutral"
     end
   end
@@ -80,7 +80,11 @@ module ApplicationHelper
   end
 
   def command_button_classes(kind = :secondary)
-    kind == :primary ? "ap-command-button ap-command-primary" : "ap-command-button ap-command-secondary"
+    case kind
+    when :primary then "ap-command-button ap-command-primary"
+    when :danger then "ap-command-button ap-decision-danger"
+    else "ap-command-button ap-command-secondary"
+    end
   end
 
   def tool_action_permission_state(action)
@@ -155,6 +159,12 @@ module ApplicationHelper
     when "passport_grant"
       grant = request.grant
       pattern = grant&.pattern || request.suggested_grant_pattern
+      return {
+        label: "Passport grant revoked",
+        detail: "Original grant was revoked; this action stayed allowed by the earlier decision.",
+        result: "revoked"
+      } if grant.blank?
+
       {
         label: "Added to passport",
         detail: "Grant saved: #{capability} allow #{pattern}.",
