@@ -24,6 +24,7 @@ class DashboardsControllerTest < ActionDispatch::IntegrationTest
     assert_select "button", text: "OpenCode demo"
     assert_select "button", text: "Claude Code demo"
     assert_select "button", text: "Codex demo"
+    assert_select "button", text: "Pi demo"
     assert_select "turbo-frame#session_sidebar"
     assert_select ".ap-workspace[data-controller~='sidebar-resize'][data-sidebar-resize-storage-key-value='agent-control-room:session-sidebar-width']"
     assert_select ".ap-sidebar-resizer[role='separator']", 1
@@ -113,6 +114,7 @@ class DashboardsControllerTest < ActionDispatch::IntegrationTest
         assert_select "button[data-session-filter-target='button'][data-session-filter-runtime-value='all'][aria-pressed='true']", text: "Any"
         assert_select "button[data-session-filter-target='button'][data-session-filter-runtime-value='codex']", text: "Codex"
         assert_select "button[data-session-filter-target='button'][data-session-filter-runtime-value='opencode']", text: "Opencode"
+        assert_select "button[data-session-filter-target='button'][data-session-filter-runtime-value='pi']", text: "Pi"
       end
       assert_select ".ap-session-project", 2
       assert_select ".ap-session-project", text: /shared-project/ do

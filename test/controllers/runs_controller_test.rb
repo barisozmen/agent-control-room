@@ -67,6 +67,18 @@ class RunsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "codex/main-agent", run.passports.find_by!(actor_ref: "main-agent").actor_name
   end
 
+  test "starts a Pi demo run through the runtime registry" do
+    assert_difference -> { Run.count }, 1 do
+      post runs_path, params: { runtime_name: "pi" }
+    end
+
+    run = Run.latest_first.first
+
+    assert_redirected_to run_path(run)
+    assert_equal "pi", run.runtime_name
+    assert_equal "pi/main-agent", run.passports.find_by!(actor_ref: "main-agent").actor_name
+  end
+
   test "failed run page shows setup guidance and retry action" do
     failed_run = Run.create!(
       runtime_name: "opencode",

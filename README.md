@@ -10,7 +10,7 @@ Observe agent sessions on your computer, inspect agent and subagent lineage, pau
 
 [Watch the Agent Identity Control Room demo video](.github/assets/agent-control-room-video.mp4)
 
-The v1 prototype is OpenCode-first: a Rails control room plus an OpenCode observer. The core model is runtime-neutral, and the app now has concrete demo launch adapters for OpenCode, Claude Code, and Codex through the same event contract.
+The v1 prototype is OpenCode-first: a Rails control room plus an OpenCode observer. The core model is runtime-neutral, and the app now has concrete demo launch adapters for OpenCode, Claude Code, Codex, and Pi through the same event contract.
 
 ## Quick Start
 
@@ -48,7 +48,7 @@ The observer is fail-open when the Rails app is offline, so stopping Agent Ident
 ## What It Does
 
 - Observes local OpenCode sessions from any project on this computer.
-- Starts scripted demo runs through OpenCode, Claude Code, or Codex adapters.
+- Starts scripted demo runs through OpenCode, Claude Code, Codex, or Pi adapters.
 - Shows the runtime lineage: owner, main agent, subagents, and nested subagents.
 - Attaches each visible actor to a run-scoped passport that describes effective authority.
 - Pauses gated tool actions until the user chooses `Allow once`, `Add to passport`, or `Deny`.
@@ -61,7 +61,7 @@ This is a local-first hackathon prototype.
 
 Run it on loopback for the demo. Do not expose the Rails control room on a LAN or public host without adding app authentication.
 
-V1 gates intent-level runtime permissions through OpenCode hooks. Claude Code and Codex currently use the shared launcher and observer contract; full per-tool permission bridges for those runtimes are the next adapter layer. This is not an OS sandbox, a secret vault, or a hosted team administration product.
+V1 gates intent-level runtime permissions through OpenCode hooks. Claude Code, Codex, and Pi currently use the shared launcher and observer contract; full per-tool permission bridges for those runtimes are the next adapter layer. Pi has no built-in sandbox, so the demo launcher uses read-only tool allowlists. This is not an OS sandbox, a secret vault, or a hosted team administration product.
 
 ## Permission Decisions
 
@@ -85,7 +85,7 @@ Baris
     +-- docs-writer
 ```
 
-Run it from the UI with an OpenCode, Claude Code, or Codex demo button, or start the app first:
+Run it from the UI with an OpenCode, Claude Code, Codex, or Pi demo button, or start the app first:
 
 ```bash
 bin/setup --skip-server
@@ -98,12 +98,13 @@ Then open:
 bin/find_server_port --url
 ```
 
-The default demo launcher expects `opencode` on `PATH`. The UI also exposes Claude Code and Codex demo launchers. To use another binary:
+The default demo launcher expects `opencode` on `PATH`. The UI also exposes Claude Code, Codex, and Pi demo launchers. To use another binary:
 
 ```bash
 AGENT_PASSPORTS_OPENCODE=/path/to/opencode bin/dev
 AGENT_PASSPORTS_CLAUDE_CODE=/path/to/claude bin/dev
 AGENT_PASSPORTS_CODEX=/path/to/codex bin/dev
+AGENT_PASSPORTS_PI=/path/to/pi bin/dev
 ```
 
 To use another port:
@@ -152,7 +153,7 @@ env -u BUNDLE_GEMFILE -u BUNDLE_BIN_PATH bin/rails test:all
 - `docs/requirements.md` - constraints and launch goals.
 - `docs/manifesto.md` - why this exists and what v1 refuses.
 - `docs/spec.md` - v1 features, routes, and adapter boundary.
-- `docs/runtime_adapters.md` - adapter interface and OpenCode/Claude Code/Codex plan.
+- `docs/runtime_adapters.md` - adapter interface and OpenCode/Claude Code/Codex/Pi plan.
 - `docs/DESIGN.md` - OpenCode-like light-mode UI system.
 - `docs/domain_model.md` - Rails model plan.
 - `docs/tech_stack.md` - stack choices and verification.
@@ -168,7 +169,7 @@ Agent Identity Control Room needs contributions that turn the prototype into a d
 
 We would love help with:
 
-- Full per-tool permission bridges for Claude Code and Codex.
+- Full per-tool permission bridges for Claude Code, Codex, and Pi.
 - Additional runtime adapters that emit the canonical event contract.
 - Stronger OpenCode hook coverage, failure handling, and adapter tests.
 - Clearer passport scope previews for commands, files, network access, and project paths.

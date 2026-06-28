@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 const DEFAULT_FILTER = "all"
-const RUNTIME_FILTERS = new Set([DEFAULT_FILTER, "codex", "opencode"])
+const RUNTIME_FILTERS = new Set([DEFAULT_FILTER, "codex", "opencode", "pi"])
 const STATUS_FILTERS = new Set([DEFAULT_FILTER, "running", "completed"])
 const RUNNING_STATUSES = new Set(["starting", "running"])
 

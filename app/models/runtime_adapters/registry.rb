@@ -32,6 +32,16 @@ module RuntimeAdapters
         main_agent_name: "codex/main-agent",
         observed_task: "Observed Codex session",
         cli_class_name: "RuntimeAdapters::CodexCli"
+      ),
+      Runtime.new(
+        name: "pi",
+        label: "Pi",
+        provider: "pi",
+        command_env_key: "AGENT_PASSPORTS_PI",
+        default_command: "pi",
+        main_agent_name: "pi/main-agent",
+        observed_task: "Observed Pi session",
+        cli_class_name: "RuntimeAdapters::PiCli"
       )
     ].index_by(&:name).freeze
 
@@ -40,7 +50,10 @@ module RuntimeAdapters
       "claude" => "claude_code",
       "claude-code" => "claude_code",
       "claude_code" => "claude_code",
-      "codex_cli" => "codex"
+      "codex_cli" => "codex",
+      "pi_coding_agent" => "pi",
+      "pi-cli" => "pi",
+      "pi_cli" => "pi"
     }.freeze
 
     def self.fetch(name)

@@ -52,7 +52,9 @@ module ObservedRuntimeSessions
       [
         RuntimeAdapters::CodexProcessScanner.new,
         RuntimeAdapters::CodexSessionLogScanner.new,
-        RuntimeAdapters::OpencodeSessionLogScanner.new
+        RuntimeAdapters::OpencodeSessionLogScanner.new,
+        RuntimeAdapters::PiProcessScanner.new,
+        RuntimeAdapters::PiSessionLogScanner.new
       ]
     end
 

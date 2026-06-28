@@ -27,7 +27,7 @@
       </div>
 
       <div class="mt-2 flex flex-wrap gap-1" role="group" aria-label="Filter sessions by runtime">
-        <% [["all", "Any"], ["codex", "Codex"], ["opencode", "Opencode"]].each do |runtime_filter, label| %>
+        <% [["all", "Any"], ["codex", "Codex"], ["opencode", "Opencode"], ["pi", "Pi"]].each do |runtime_filter, label| %>
           <button type="button"
                   class="ap-quiet-link <%= "ap-quiet-link-active" if runtime_filter == "all" %>"
                   data-session-filter-target="button"
