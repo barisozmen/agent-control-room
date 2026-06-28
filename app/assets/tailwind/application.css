@@ -62,10 +62,11 @@ a {
 
 .ap-workspace {
   --ap-session-sidebar-width: 208px;
+  --ap-lineage-width: 320px;
 
   border-bottom: 1px solid var(--ap-border);
   display: grid;
-  grid-template-columns: minmax(176px, var(--ap-session-sidebar-width)) minmax(260px, 320px) minmax(420px, 1fr);
+  grid-template-columns: minmax(176px, var(--ap-session-sidebar-width)) minmax(260px, var(--ap-lineage-width)) minmax(420px, 1fr);
   min-height: calc(100dvh - 73px);
 }
 
@@ -74,6 +75,11 @@ a {
 }
 
 .ap-workspace-sidebar {
+  min-width: 0;
+  position: relative;
+}
+
+.ap-workspace-lineage {
   min-width: 0;
   position: relative;
 }

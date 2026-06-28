@@ -10,7 +10,10 @@
              data-sidebar-resize-min-value="176"
              data-sidebar-resize-max-value="420"
              data-sidebar-resize-reserved-width-value="740">
-      <aside class="ap-panel ap-workspace-sidebar ap-workspace-sessions ap-border border-b lg:border-b-0 lg:border-r" data-sidebar-resize-target="sidebar">
+      <aside class="ap-panel ap-workspace-sidebar ap-workspace-sessions ap-border border-b lg:border-b-0 lg:border-r"
+             data-sidebar-resize-target="sidebar panel"
+             data-sidebar-resize-panel-name="session"
+             data-sidebar-resize-width-variable="--ap-session-sidebar-width">
         <%= render partial: "runs/session_sidebar", locals: @session_sidebar || Run.session_sidebar_locals(selected_run: @run) %>
         <div class="ap-sidebar-resizer"
              role="separator"
@@ -23,11 +26,35 @@
              aria-valuenow="208"
              title="Drag to resize sessions sidebar"
              data-sidebar-resize-target="handle"
+             data-sidebar-resize-panel-name="session"
+             data-sidebar-resize-reserved-width="420"
+             data-sidebar-resize-reserved-panel-names="lineage"
              data-action="pointerdown->sidebar-resize#start keydown->sidebar-resize#handleKeydown"></div>
       </aside>
 
-      <aside class="ap-panel ap-workspace-lineage ap-border border-b lg:border-b-0 lg:border-r">
+      <aside class="ap-panel ap-workspace-lineage ap-border border-b lg:border-b-0 lg:border-r"
+             data-sidebar-resize-target="panel"
+             data-sidebar-resize-panel-name="lineage"
+             data-sidebar-resize-width-variable="--ap-lineage-width"
+             data-sidebar-resize-storage-key="agent-control-room:runtime-lineage-width"
+             data-sidebar-resize-min="260"
+             data-sidebar-resize-max="560">
         <%= render "runs/passport_tree", run: @run, selected_passport: @selected_passport, passport_tree: @passport_tree %>
+        <div class="ap-sidebar-resizer"
+             role="separator"
+             tabindex="0"
+             aria-label="Resize runtime lineage"
+             aria-orientation="vertical"
+             aria-controls="passport_tree"
+             aria-valuemin="260"
+             aria-valuemax="560"
+             aria-valuenow="320"
+             title="Drag to resize runtime lineage"
+             data-sidebar-resize-target="handle"
+             data-sidebar-resize-panel-name="lineage"
+             data-sidebar-resize-reserved-width="420"
+             data-sidebar-resize-reserved-panel-names="session"
+             data-action="pointerdown->sidebar-resize#start keydown->sidebar-resize#handleKeydown"></div>
       </aside>
 
       <section class="ap-panel ap-workspace-current-ask ap-focus-pane">

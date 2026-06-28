@@ -23,7 +23,10 @@
            data-sidebar-resize-min-value="176"
            data-sidebar-resize-max-value="420"
            data-sidebar-resize-reserved-width-value="360">
-    <aside class="ap-panel ap-workspace-sidebar ap-border border-b lg:border-b-0 lg:border-r" data-sidebar-resize-target="sidebar">
+    <aside class="ap-panel ap-workspace-sidebar ap-border border-b lg:border-b-0 lg:border-r"
+           data-sidebar-resize-target="sidebar panel"
+           data-sidebar-resize-panel-name="session"
+           data-sidebar-resize-width-variable="--ap-session-sidebar-width">
       <%= render partial: "runs/session_sidebar", locals: @session_sidebar || Run.session_sidebar_locals(selected_run: nil) %>
       <div class="ap-sidebar-resizer"
            role="separator"
@@ -36,6 +39,7 @@
            aria-valuenow="208"
            title="Drag to resize sessions sidebar"
            data-sidebar-resize-target="handle"
+           data-sidebar-resize-panel-name="session"
            data-action="pointerdown->sidebar-resize#start keydown->sidebar-resize#handleKeydown"></div>
     </aside>
 

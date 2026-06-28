@@ -14,6 +14,7 @@ class DashboardsControllerTest < ActionDispatch::IntegrationTest
     assert_select "button", text: "Codex demo"
     assert_select "turbo-frame#session_sidebar"
     assert_select ".ap-workspace[data-controller~='sidebar-resize'][data-sidebar-resize-storage-key-value='agent-control-room:session-sidebar-width']"
+    assert_select ".ap-sidebar-resizer[role='separator']", 1
     assert_select ".ap-sidebar-resizer[role='separator'][aria-label='Resize sessions sidebar'][data-sidebar-resize-target='handle']"
   end
 
@@ -28,7 +29,10 @@ class DashboardsControllerTest < ActionDispatch::IntegrationTest
     assert_select "turbo-frame#run_header"
     assert_select "turbo-frame#session_sidebar"
     assert_select ".ap-workspace[data-controller~='sidebar-resize']"
-    assert_select ".ap-sidebar-resizer[role='separator'][aria-orientation='vertical']"
+    assert_select ".ap-sidebar-resizer[role='separator'][aria-orientation='vertical']", 2
+    assert_select ".ap-sidebar-resizer[role='separator'][aria-label='Resize sessions sidebar'][data-sidebar-resize-panel-name='session']"
+    assert_select ".ap-sidebar-resizer[role='separator'][aria-label='Resize runtime lineage'][data-sidebar-resize-panel-name='lineage']"
+    assert_select ".ap-workspace-lineage[data-sidebar-resize-panel-name='lineage']"
     assert_select "turbo-frame#passport_tree"
     assert_select "turbo-frame#permission_inbox"
     assert_select "span", text: "Status: running"
