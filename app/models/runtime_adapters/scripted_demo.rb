@@ -54,7 +54,7 @@ module RuntimeAdapters
       emit("session.started")
 
       delegate("baris", nil, "Baris", "human", "local", "Local project owner", allow_all)
-      delegate("main-agent", "baris", runtime.main_agent_name, "agent", runtime.provider, "Implement the Agent Control Room demo with #{runtime.label}", allow_all)
+      delegate("main-agent", "baris", runtime.main_agent_name, "agent", runtime.provider, "Implement the Agent Identity Control Room demo with #{runtime.label}", allow_all)
       delegate("code-writer", "main-agent", "code-writer", "agent", runtime.provider, "Patch the Rails app for the demo", rules(read: "allow", edit: "ask", bash: "ask", web: "ask", delegate: "deny"))
       delegate("security-auditor", "main-agent", "security-auditor", "agent", runtime.provider, "Review the prototype for runtime permission risks", rules(read: "allow", edit: "deny", bash: "ask", web: "ask", delegate: "allow"))
       delegate("docs-writer", "main-agent", "docs-writer", "agent", runtime.provider, "Keep the demo narrative tight", rules(read: "allow", edit: "ask", bash: "deny", web: "ask", delegate: "deny"))

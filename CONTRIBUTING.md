@@ -1,6 +1,6 @@
-# Contributing to Agent Control Room
+# Contributing to Agent Identity Control Room
 
-Agent Control Room is a local-first Rails prototype for observing agent runtimes, showing agent and subagent authority, gating risky actions, and recording audit receipts. Contributions should keep that trust boundary clear: runtime adapters translate events, while the Rails core owns passports, grants, permission requests, decisions, and receipts.
+Agent Identity Control Room is a local-first Rails prototype for observing agent runtimes, showing agent and subagent authority, gating risky actions, and recording audit receipts. Contributions should keep that trust boundary clear: runtime adapters translate events, while the Rails core owns passports, grants, permission requests, decisions, and receipts.
 
 ## Local Setup
 

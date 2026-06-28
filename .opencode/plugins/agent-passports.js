@@ -23,9 +23,9 @@ export const AgentPassportsPlugin = async () => {
           return
         }
 
-        throw new Error(`Unexpected Agent Control Room permission status: ${response.status || "missing"}`)
+        throw new Error(`Unexpected Agent Identity Control Room permission status: ${response.status || "missing"}`)
       } catch (error) {
-        console.error("Agent Control Room permission bridge denied by default:", error)
+        console.error("Agent Identity Control Room permission bridge denied by default:", error)
         output.status = "deny"
       }
     },
@@ -69,7 +69,7 @@ async function postRuntimeEvent(payload) {
 
   if (!response.ok) {
     const body = await response.text()
-    throw new Error(`Agent Control Room bridge failed: ${response.status} ${body}`)
+    throw new Error(`Agent Identity Control Room bridge failed: ${response.status} ${body}`)
   }
 
   return response.json()
@@ -96,7 +96,7 @@ async function fetchPermissionRequest(url) {
 
   if (!response.ok) {
     const body = await response.text()
-    throw new Error(`Agent Control Room permission poll failed: ${response.status} ${body}`)
+    throw new Error(`Agent Identity Control Room permission poll failed: ${response.status} ${body}`)
   }
 
   return response.json()

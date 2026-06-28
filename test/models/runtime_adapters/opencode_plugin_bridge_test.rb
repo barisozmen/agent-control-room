@@ -20,7 +20,7 @@ class RuntimeAdapters::OpencodePluginBridgeTest < ActiveSupport::TestCase
     assert_includes plugin, "permissionRequestUrl"
     assert_includes plugin, "AGENT_PASSPORTS_PERMISSION_TIMEOUT_MS"
     assert_includes plugin, 'output.status = "deny"'
-    assert_includes plugin, "Agent Control Room permission bridge denied by default"
+    assert_includes plugin, "Agent Identity Control Room permission bridge denied by default"
   end
 
   test "permission ask waits for rails decisions and denies on polling trouble" do
