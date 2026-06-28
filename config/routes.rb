@@ -10,7 +10,9 @@ Rails.application.routes.draw do
   root "dashboards#show"
 
   resources :runs, only: %i[create show] do
-    resources :passports, only: :show
+    resources :passports, only: :show do
+      resources :grants, only: :destroy
+    end
     resources :audit_events, only: :index
     resources :tool_actions, only: :index
   end

@@ -112,7 +112,7 @@ class Run < ApplicationRecord
       elsif cursor.present?
         tool_actions.where(tool_action_display_cursor_condition(oldest_action)).unscope(:order).count
       else
-        total_count - actions.size
+        [ total_count - actions.size, 0 ].max
       end
 
     ToolActionPage.new(
